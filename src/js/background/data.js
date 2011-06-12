@@ -8,29 +8,37 @@
 twic.data = ( function() {
 
 	var
-		models = { },
-		self = this;
+		self = this,
+		migrations = {
+			'0': {
+				version: '1',
+				migrate: function(db, req, callback) {
+					var
+						store = db.createObjectStore('options', {
+							'keyPath': 'key'
+						} );
 
-	self.register = function(ctor) {
-		var
-			model = new ctor();
-
-		models[model.storeName] = model;
-	};
+					callback();
+				}
+			}
+		};
 
 	var upgrade = function(db, func) {
-		if ('' === db.version) {
+		var
+			version = '' !== db.version ? db.version : '0';;
+
+		if (version in migrations) {
 			var
-				request = db.setVersion('1');
+				migration = migrations[version],
+				req = db.setVersion(migration.version);
 
-			request.onerror = function(e) { console.dir(e); };
-			request.onsuccess = function() {
-				var
-					store = db.createObjectStore('options', {
-						keyPath: 'key'
-					} );
+			req.onerror = function(e) { console.dir(e); };
+			req.onsuccess = function() {
+				twic.debug.log('Migration to the version ' + migration.version);
 
+				migration.migrate(db, req, function() {
 					upgrade(db, func);
+				} );
 			};
 		} else {
 			func.call(db);
@@ -41,23 +49,17 @@ twic.data = ( function() {
 		var
 			request = webkitIndexedDB.open(twic.name);
 
-		request.onerror = function(e) {
-			console.dir(e);
-		};
-
+		request.onerror = function(e) { console.dir(e); };
 		request.onsuccess = function() {
 			var
 				database = request.result;
 
-			if (database.version != version) {
-				upgrade(database, func);
-			} else {
-				func.call(database);
-			}
+			upgrade(database, func);
 		};
 	};
 
 	process( function() {
+		twic.debug.log('Data store initialized');
 	} );
 
 }() );

@@ -23,5 +23,3 @@ twic.data.model.Options = function() {
 };
 
 goog.inherits(twic.data.model.Options, twic.DataModel);
-
-twic.data.register(twic.data.model.Options);

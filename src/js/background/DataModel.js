@@ -15,5 +15,3 @@ twic.DataModel = function() {
 	this.keyName   = '';
 	this.fields    = { };
 };
-
-twic.DataModel.prototype.upgrade = function(db, version) { };
