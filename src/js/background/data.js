@@ -8,16 +8,12 @@
 twic.data = ( function() {
 
 	var
-		self = this,
+		self = { },
 		migrations = {
 			'0': {
 				version: '1',
 				migrate: function(db, req, callback) {
-					var
-						store = db.createObjectStore('options', {
-							'keyPath': 'key'
-						} );
-
+					db.createObjectStore('options', { 'keyPath': 'key' } );
 					callback();
 				}
 			}
@@ -45,7 +41,7 @@ twic.data = ( function() {
 		}
 	};
 
-	var process = function(func) {
+	self.process = function(func) {
 		var
 			request = webkitIndexedDB.open(twic.name);
 
@@ -58,8 +54,6 @@ twic.data = ( function() {
 		};
 	};
 
-	process( function() {
-		twic.debug.log('Data store initialized');
-	} );
+	return self;
 
 }() );
